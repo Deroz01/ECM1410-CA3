@@ -8,7 +8,7 @@ public class Post implements Serializable{
     private int id;
     private int endorseNumber;
     private int commentNumber;
-    
+
     public String getHandle() {
         return handle;
     }
@@ -19,22 +19,22 @@ public class Post implements Serializable{
         return id;
     }
     public int getCommentNumber() {
-		return commentNumber;
-	}
+        return commentNumber;
+    }
     public int getEndorseNumber() {
-		return endorseNumber;
-	}
+        return endorseNumber;
+    }
     public void increaseEndorseNumber (){
-    	endorseNumber++;
+        endorseNumber++;
     }
     public void decreaseEndorseNumber (){
-    	endorseNumber--;
+        endorseNumber--;
     }
     public void increaseCommentNumber (){
-    	commentNumber++;
+        commentNumber++;
     }
     public void decreaseCommentNumber (){
-    	commentNumber--;
+        commentNumber--;
     }
 
     private static int idCount=0;
@@ -45,18 +45,22 @@ public class Post implements Serializable{
         this.id = idCount;
         idCount++;
     }
-    
+
+    public Post (int id){
+        this.id = id;
+    }
+
     @Override
-	public String toString() {
-		return "ID: " + id + "\nAccount: " + handle + "\nNo. endorsements: " + endorseNumber + " | No. comments: "+ commentNumber + "\n" + message;
-	}
-    
-	public static void main(String[] args) {
+    public String toString() {
+        return "ID: " + id + "\nAccount: " + handle + "\nNo. endorsements: " + endorseNumber + " | No. comments: "+ commentNumber + "\n" + message;
+    }
+
+    /**public static void main(String[] args) {
         Post a = new Post("a", "welcome");
         System.out.println(a);
         Post b = new Post("b", "hi");
         System.out.println(b);
         Post c = new Post("c", "hello");
         System.out.println(c);
-    }
+    }*/
 }
