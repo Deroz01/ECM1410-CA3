@@ -3,7 +3,7 @@ package socialmedia;
 import java.io.Serializable;
 
 public class Account implements Serializable{
-	private int id;
+    private int id;
     private String handle;
     private String description;
     private int postCount;
@@ -21,11 +21,11 @@ public class Account implements Serializable{
         return id;
     }
     public int getPostCount() {
-		return postCount;
-	}
+        return postCount;
+    }
     public int getEndorseCount() {
-		return endorseCount;
-	}
+        return endorseCount;
+    }
     public void setHandle(String handle) {
         this.handle = handle;
     }
@@ -41,16 +41,18 @@ public class Account implements Serializable{
     }
     public Account (String handle, String description) {
         this(handle);
+        this.id = idNumber;
         this.description = description;
+        idNumber++;
     }
-	@Override
-	public String toString() {
-		return "ID: " + id + "\nHandle: " + handle + "\nDescription: " + description + "\nPost count: " + postCount + "\nEndorse count: " + endorseCount;
-	}
-	public static void main(String[] args) {
-		Account user1 = new Account("user1");
-		System.out.println(user1);
-	}
-	
-    
+    @Override
+    public String toString() {
+        return "ID: " + id + "\nHandle: " + handle + "\nDescription: " + description + "\nPost count: " + postCount + "\nEndorse count: " + endorseCount;
+    }
+    /*public static void main(String[] args) {
+        Account user1 = new Account("user1");
+        System.out.println(user1);
+    }*/
+
+
 }
