@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class SocialMedia implements SocialMediaPlatform {
     ArrayList<Account> accounts = new ArrayList<>();
     ArrayList<Post> posts = new ArrayList<>();
-
+    
     public ArrayList<Post> getPosts() {
 		return posts;
 	}
@@ -13,10 +13,11 @@ public class SocialMedia implements SocialMediaPlatform {
 		return accounts;
 	}
 
+	@Override
     public int createAccount(String handle) throws IllegalHandleException, InvalidHandleException {
     	boolean accountExists = false;
     	for (Account account : accounts) {
-    		if (account.getHandle().equals(handle)) {
+    		if (account.getHandle() == handle) {
     			accountExists = true;
     		}
     	}
@@ -72,7 +73,7 @@ public class SocialMedia implements SocialMediaPlatform {
 
     @Override
     public String showAccount(String handle) throws HandleNotRecognisedException {
-    	String user = null;
+    	String user = "";
     	boolean accountExists = false;
     	for (Account account : accounts) {
     		if (account.getHandle() == handle) {
@@ -109,73 +110,77 @@ public class SocialMedia implements SocialMediaPlatform {
     @Override
     public int endorsePost(String handle, int id)
             throws HandleNotRecognisedException, PostIDNotRecognisedException, NotActionablePostException {
-        // TODO Auto-generated method stub
-        boolean endorsementExists = false;
-        boolean accountExists = false;
-        boolean actionablePost = false;
-        for (Account account : accounts) {
-            if (account.getHandle() == handle) {
-                accountExists = true;
-            }
-        }
-        for (Post post : posts) {
-            if (post.getId() == id && post instanceof Endorsement) {
-                endorsementExists = true;
-            }
-        }
-        for (Post post : posts) {
-            // not sure if comments can be endorsed
-            // todo check if comments can be endorsed
-            if (post.getId() == id && (post instanceof Post || post instanceof Comment)) {
-                actionablePost = true;
-            }
-        }
-        if (!accountExists) {
-            throw new HandleNotRecognisedException();
-        } else if (endorsementExists) {
-            throw new PostIDNotRecognisedException();
-        } else if (actionablePost){
-            throw new NotActionablePostException();
-        } else {
-            Endorsement endorsement = new Endorsement(handle, id);
-            posts.add(endorsement);
-            return endorsement.getId();
-        }
+    	boolean handleExists = false;
+    	boolean postExists = false;
+    	boolean isEndorsement = false;
+    	Post endorsement = null;
+    	for (Account account : accounts) {
+    		if (account.getHandle() == handle) {
+    			handleExists = true;
+    		}
+    	}
+    	for (Post post : posts) {
+			if (post.getId()== id) {
+				postExists = true;
+				if (post instanceof Endorsement) {
+					isEndorsement = true;
+				} else {
+					endorsement = new Endorsement(handle, post.getMessage(), post.getHandle());
+					posts.add(endorsement);
+					post.increaseEndorseNumber();
+				}
+				break;
+			}
+		}
+    	if (!handleExists) {
+    		throw new HandleNotRecognisedException();
+    	} else if (!postExists) {
+			throw new PostIDNotRecognisedException();
+		} else if (isEndorsement) {
+			throw new NotActionablePostException();
+		}
+        return endorsement.getId();
     }
 
     @Override
     public int commentPost(String handle, int id, String message) throws HandleNotRecognisedException,
             PostIDNotRecognisedException, NotActionablePostException, InvalidPostException {
-
-        boolean commentExists = false;
-        boolean accountExists = false;
-        boolean actionablePost = false;
-        for (Account account : accounts) {
-            if (account.getHandle() == handle) {
-                accountExists = true;
-            }
-        }
-        for (Post post : posts) {
-            if (post.getId() == id && post instanceof Comment) {
-                commentExists = true;
-            }
-        }
-        for (Post post : posts) {
-            if (post.getId() == id && (post instanceof Post || post instanceof Comment)) {
-                actionablePost = true;
-            }
-        }
-        if (!accountExists) {
-            throw new HandleNotRecognisedException();
-        } else if (commentExists) {
-            throw new PostIDNotRecognisedException();
-        } else if (actionablePost){
-            throw new NotActionablePostException();
-        } else {
-            Comment comment = new Comment(handle, id, message);
-            posts.add(comment);
-            return comment.getId();
-        }
+    	boolean handleExists = false;
+    	boolean postExists = false;
+    	boolean isEndorsement = false;
+    	boolean validPost = false;
+    	Post comment = null;
+    	for (Account account : accounts) {
+    		if (account.getHandle() == handle) {
+    			handleExists = true;
+    		}
+    	}
+    	for (Post post : posts) {
+			if (post.getId() == id) {
+				postExists = true;
+				if (post instanceof Endorsement) {
+					isEndorsement = true;
+				} else if (message ==""|| message.length()>30){
+					validPost = false;
+				} 
+				else {
+					comment = new Comment(id, handle, message);
+					posts.add(comment);
+					post.increaseCommentNumber();
+				}
+				break;
+			}
+		}
+    	if (!handleExists) {
+    		throw new HandleNotRecognisedException();
+    	} else if (!postExists) {
+			throw new PostIDNotRecognisedException();
+		} else if (isEndorsement) {
+			throw new NotActionablePostException();
+		} else if (!validPost) {
+			throw new InvalidPostException();
+		}
+        return comment.getId();
     }
 
     @Override
@@ -184,6 +189,13 @@ public class SocialMedia implements SocialMediaPlatform {
         for (Post post : posts) {
 			if (post.getId() == id) {
 				postExists = true;
+				for (Post childPost : posts) {
+					if (childPost instanceof Endorsement) {
+						if (((Endorsement) childPost).getEndorsedHandle() == post.getHandle()) {
+							deletePost(childPost.getId());
+						}
+					}
+				}
 				posts.remove(post);
 			}
 		}
@@ -194,8 +206,18 @@ public class SocialMedia implements SocialMediaPlatform {
 
     @Override
     public String showIndividualPost(int id) throws PostIDNotRecognisedException {
-        // TODO Auto-generated method stub
-        return null;
+    	boolean postExists = false;
+        String postString = "";
+        for (Post post : posts) {
+        	if (post.getId() == id) {
+        		postString = post.toString();
+        		postExists = true;
+        	}
+        }
+        if (!postExists) {
+        	throw new PostIDNotRecognisedException();
+        }
+        return postString;
     }
 
     @Override
@@ -207,20 +229,42 @@ public class SocialMedia implements SocialMediaPlatform {
 
     @Override
     public int getMostEndorsedPost() {
-        // TODO Auto-generated method stub
-        return 0;
+    	Post mostEndorsedPost = null;
+    	int mostEndorsements = 0;
+    	for (Post post : posts) {
+			if (post.getEndorseNumber() >= mostEndorsements) {
+				mostEndorsements = post.getEndorseNumber();
+				mostEndorsedPost = post;
+			}
+		}
+        return mostEndorsedPost.getId();
     }
 
     @Override
     public int getMostEndorsedAccount() {
-        // TODO Auto-generated method stub
-        return 0;
+    	Account mostEndorsedAccount = null;
+    	int mostEndorsements = 0;
+    	for (Account account : accounts) {
+    		int accountEndorsements = 0;
+			for (Post post : posts) {
+				if (post.getHandle() == account.getHandle()) {
+					accountEndorsements += post.getEndorseNumber();
+				}
+			}
+			if (accountEndorsements >= mostEndorsements) {
+				mostEndorsements = accountEndorsements;
+				mostEndorsedAccount = account;
+			}
+		}
+        return mostEndorsedAccount.getId();
     }
 
     @Override
     public void erasePlatform() {
         this.accounts.clear();
         this.posts.clear();
+        Post.resetIdCounter();
+        Account.resetIdCounter();
         System.out.println("\nPlatform erased...");
     }
 
@@ -240,9 +284,10 @@ public class SocialMedia implements SocialMediaPlatform {
         if (obj instanceof SocialMedia) {
         	this.accounts = ((SocialMedia) obj).accounts;
         	this.posts = ((SocialMedia) obj).posts;
+        	System.out.printf("\nPlatform loaded from %s%n", filename);
         }
         in.close();
-        System.out.printf("\nPlatform loaded from %s%n", filename);
+        
     }
 
     @Override
@@ -301,60 +346,45 @@ public class SocialMedia implements SocialMediaPlatform {
 
     @Override
     public int getTotalOriginalPosts() {
-        // TODO Auto-generated method stub
-        return 0;
+        int totalOriginalPosts = 0;
+        for (Post post : posts) {
+        	if (!(post instanceof Endorsement || post instanceof Comment)) {
+				totalOriginalPosts ++;
+			}
+        }
+        return totalOriginalPosts;
     }
 
     @Override
     public int getTotalEndorsmentPosts() {
-        // TODO Auto-generated method stub
-        return 0;
+        int totalEndorsements = 0;
+        for (Post post : posts) {
+			if (post instanceof Endorsement) {
+				totalEndorsements++;
+			}
+		}
+        return totalEndorsements;
     }
 
     @Override
     public int getTotalCommentPosts() {
-        // TODO Auto-generated method stub
-        return 0;
+    	int totalComments = 0;
+        for (Post post : posts) {
+			if (post instanceof Comment) {
+				totalComments++;
+			}
+		}
+        return totalComments;
     }
     
-
+    
+    
+    
     
     public static void main(String[] args) {
-        //new SocialMedia
+    	//new SocialMedia
         SocialMedia a = new SocialMedia();
-
-        try {
-            a.createAccount("test1", "test");
-            a.createPost("test1","test");
-            a.createAccount("test2", "test");
-            a.endorsePost("test2", 1);
-            ArrayList<Post> posts = new ArrayList<>();
-            posts = a.getPosts();
-
-            for (Post post : posts){
-                System.out.println(post.toString());
-            }
-        }
-        catch (IllegalHandleException e) {
-            e.printStackTrace();
-        }
-        catch (InvalidHandleException e) {
-            e.printStackTrace();
-        }
-        catch (InvalidPostException e) {
-            e.printStackTrace();
-        }
-        catch (HandleNotRecognisedException e){
-            e.printStackTrace();
-        }
-        catch (PostIDNotRecognisedException e){
-            e.printStackTrace();
-        }
-        catch (NotActionablePostException e){
-            e.printStackTrace();
-        }
-    }
-        /*
+        
         //create accounts
         try {
 			System.out.println(a.createAccount("user1"));
@@ -363,11 +393,11 @@ public class SocialMedia implements SocialMediaPlatform {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-
+        
         //print list of accounts and length
         System.out.println("\n\n"+a.getAccounts());
         System.out.println(a.getNumberOfAccounts()+ "\n\n");
-
+        
         //show account
         try {
 			System.out.println(a.showAccount("user1"));
@@ -375,7 +405,7 @@ public class SocialMedia implements SocialMediaPlatform {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-
+        
         //update description
         try {
 			a.updateAccountDescription("user1", "user1Bio");
@@ -384,7 +414,7 @@ public class SocialMedia implements SocialMediaPlatform {
 			e1.printStackTrace();
 		}
         System.out.println();
-
+        
         //show account
         try {
 			System.out.println(a.showAccount("user1"));
@@ -393,7 +423,7 @@ public class SocialMedia implements SocialMediaPlatform {
 			e1.printStackTrace();
 		}
         System.out.println();
-
+        
         //remove accounts
         try {
 			a.removeAccount("user1");
@@ -401,11 +431,11 @@ public class SocialMedia implements SocialMediaPlatform {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+        
         //print list of accounts and length
         System.out.println(a.getAccounts());
         System.out.println(a.getNumberOfAccounts());
-
+        
         //save platform
         try {
 			a.savePlatform("platform.ser");
@@ -413,7 +443,7 @@ public class SocialMedia implements SocialMediaPlatform {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+        
         //loading platform into new social media
         SocialMedia b = new SocialMedia();
         try {
@@ -425,5 +455,5 @@ public class SocialMedia implements SocialMediaPlatform {
         System.out.println(b.getAccounts());
         b.erasePlatform();
         System.out.println(b.getAccounts());
-    }*/
+    }
 }

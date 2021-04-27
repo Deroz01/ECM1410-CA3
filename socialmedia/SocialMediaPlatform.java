@@ -1,7 +1,5 @@
 package socialmedia;
 
-import java.io.Serializable;
-
 /**
  * SocialMediaPlatform interface. This interface is a more elaborated version of
  * the MiniSocialMediaPlatform. The no-argument constructor of a class
