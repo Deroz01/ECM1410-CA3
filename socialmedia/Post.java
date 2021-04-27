@@ -52,20 +52,33 @@ public class Post implements Serializable{
 	public String toString() {
 		return "ID: " + id + "\nAccount: " + handle + "\nNo. endorsements: " + endorseNumber + " | No. comments: "+ getCommentNumber() + "\n" + message;
 	}
-    public String commentString() {
-		return "ID: " + getId() + "\n    Account: " + getHandle() + "\n    No. endorsements: " + getEndorseNumber() + " | No. comments: "+ getCommentNumber() + "\n    " + getMessage();
+    public String commentString(int a) {
+    	String firstLine = "";
+    	String indent = "";
+    	for (int i=0; i<a; i++) {
+    		indent += "    ";
+    		if (i>0) {
+    			firstLine += "    ";
+    		}
+    	}
+		return firstLine+"| > ID: " + getId() + "\n"+ indent+ "Account: " + getHandle() + "\n"+ indent +"No. endorsements: " + getEndorseNumber() + " | No. comments: "+ getCommentNumber() + "\n" + indent + getMessage();
 	}
     
     public Post() {
-    	this.handle = "";
+    	this.message = "The original content was removed from the system and is no longer available.";
+    	this.id = -1;
     }
     
 	public static void main(String[] args) {
         Post a = new Post("a", "welcome");
-        System.out.println(a);
+        //System.out.println(a);
         Post b = new Post("b", "hi");
-        System.out.println(b);
+        //System.out.println(b);
         Post c = new Post("c", "hello");
-        System.out.println(c);
+        System.out.println(c.commentString(1));
+        System.out.println(c.commentString(2));
+        //System.out.println(c);
+        Post genericPost = new Post();
+        //System.out.println(genericPost);
     }
 }

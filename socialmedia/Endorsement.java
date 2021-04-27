@@ -17,7 +17,7 @@ public class Endorsement extends Post {
 		return "EP@" + endorsedHandle + ": "+ getMessage();
 	}
 	@Override
-	public String commentString() {
+	public String commentString(int a) {
 		return toString();
 	}
 	public static void main(String[] args) {

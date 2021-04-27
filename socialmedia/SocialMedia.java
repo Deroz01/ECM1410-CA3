@@ -12,6 +12,10 @@ public class SocialMedia implements SocialMediaPlatform {
     public ArrayList<Account> getAccounts() {
 		return accounts;
 	}
+    
+    public SocialMedia() {
+		posts.add(new Post());
+	}
 
 	@Override
     public int createAccount(String handle) throws IllegalHandleException, InvalidHandleException {
@@ -193,6 +197,10 @@ public class SocialMedia implements SocialMediaPlatform {
 					if (childPost instanceof Endorsement) {
 						if (((Endorsement) childPost).getEndorsedHandle() == post.getHandle()) {
 							deletePost(childPost.getId());
+						}
+					} else if (childPost instanceof Comment) {
+						if (((Comment) childPost).getOrginalPostId() == post.getId()) {
+							((Comment) childPost).setOrginalPostId(-1);
 						}
 					}
 				}
@@ -384,7 +392,7 @@ public class SocialMedia implements SocialMediaPlatform {
     public static void main(String[] args) {
     	//new SocialMedia
         SocialMedia a = new SocialMedia();
-        
+        /*
         //create accounts
         try {
 			System.out.println(a.createAccount("user1"));
@@ -455,5 +463,6 @@ public class SocialMedia implements SocialMediaPlatform {
         System.out.println(b.getAccounts());
         b.erasePlatform();
         System.out.println(b.getAccounts());
+        */
     }
 }
