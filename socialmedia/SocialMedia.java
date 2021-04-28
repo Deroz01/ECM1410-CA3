@@ -248,8 +248,61 @@ public class SocialMedia implements SocialMediaPlatform {
     @Override
     public StringBuilder showPostChildrenDetails(int id)
             throws PostIDNotRecognisedException, NotActionablePostException {
-        // TODO Auto-generated method stub
-        return null;
+        boolean postExists = false;
+        boolean actionablePost = false;
+        Post parentPost = null;
+        for (Post post : posts) {
+            if (post.getId() == id && post instanceof Post) {
+                postExists = true;
+                actionablePost = true;
+                parentPost = post;
+            }
+        }
+        if (!postExists) {
+            throw new PostIDNotRecognisedException();
+        }
+        if (!actionablePost) {
+            throw new NotActionablePostException();
+        }
+
+        StringBuilder str = new StringBuilder();
+        int commentNumber = parentPost.getCommentNumber();
+        str.append(parentPost.toString());
+
+        if (commentNumber == 0){
+            ;
+        }
+        else{
+            for (Post post : posts) {
+                if (post instanceof Comment && ((Comment) post).getOrginalPostId() == parentPost.getId()) {
+                    if (post.getCommentNumber() > 0){
+                        str.append(post.commentString(post.getIndent()));
+                        int additionalComments = post.getCommentNumber();
+                        Post tempParentPost = post;
+                        while (additionalComments > 0){
+                            for (Post post1 : posts){
+                                if (post1 instanceof Comment && ((Comment) post1).getOrginalPostId() == tempParentPost.getId()) {
+                                    str.append(post1.commentString(post1.getIndent()));
+                                    additionalComments -= 1;
+                                    if (post1.getCommentNumber() > 0) {
+                                        tempParentPost = post1;
+                                    }
+                                    else{
+                                        tempParentPost = post;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        str.append(post.commentString(post.getIndent()));
+                    }
+                }
+            }
+        }
+
+        System.out.println(str);
+        return str;
     }
 
     @Override
