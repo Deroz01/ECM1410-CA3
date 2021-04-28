@@ -2,8 +2,6 @@ package socialmedia;
 import java.io.*;
 import java.util.ArrayList;
 
-import javax.security.auth.callback.ConfirmationCallback;
-
 public class SocialMedia implements SocialMediaPlatform {
     ArrayList<Account> accounts = new ArrayList<>();
     ArrayList<Post> posts = new ArrayList<>();
