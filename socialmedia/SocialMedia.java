@@ -146,35 +146,39 @@ public class SocialMedia implements SocialMediaPlatform {
         return endorsement.getId();
     }
 
-    @Override
+   @Override
     public int commentPost(String handle, int id, String message) throws HandleNotRecognisedException,
             PostIDNotRecognisedException, NotActionablePostException, InvalidPostException {
     	boolean handleExists = false;
     	boolean postExists = false;
     	boolean isEndorsement = false;
-    	boolean validPost = false;
+    	boolean validPost = true;
     	Post comment = null;
-    	for (Account account : accounts) {
+    	int accountIndex = -1;
+    	for (int i=0; i<accounts.size(); i++) {
+    		Account account = accounts.get(i);
     		if (account.getHandle() == handle) {
     			handleExists = true;
+    			accountIndex = i;
     		}
     	}
     	for (Post post : posts) {
-			if (post.getId() == id) {
-				postExists = true;
-				if (post instanceof Endorsement) {
-					isEndorsement = true;
-				} else if (message ==""|| message.length()>30){
-					validPost = false;
-				} 
-				else {
-					comment = new Comment(id, handle, message);
-					posts.add(comment);
-					post.increaseCommentNumber();
-				}
-				break;
+		if (post.getId() == id && id>=0) {
+			postExists = true;
+			if (post instanceof Endorsement) {
+				isEndorsement = true;
+			} else if (message ==""|| message.length()>30){
+				validPost = false;
+			} 
+			else {
+				comment = new Comment(id, handle, message, post.getIndent());
+				posts.add(comment);
+				post.increaseCommentNumber();
+				accounts.get(accountIndex).increasePostCount();
 			}
+			break;
 		}
+	}
     	if (!handleExists) {
     		throw new HandleNotRecognisedException();
     	} else if (!postExists) {
@@ -183,30 +187,31 @@ public class SocialMedia implements SocialMediaPlatform {
 			throw new NotActionablePostException();
 		} else if (!validPost) {
 			throw new InvalidPostException();
+		} else {
+			return comment.getId();    
 		}
-        return comment.getId();
     }
 
     @Override
     public void deletePost(int id) throws PostIDNotRecognisedException {
         boolean postExists = false;
         for (Post post : posts) {
-			if (post.getId() == id) {
-				postExists = true;
-				for (Post childPost : posts) {
-					if (childPost instanceof Endorsement) {
-						if (((Endorsement) childPost).getEndorsedHandle() == post.getHandle()) {
-							deletePost(childPost.getId());
-						}
-					} else if (childPost instanceof Comment) {
-						if (((Comment) childPost).getOrginalPostId() == post.getId()) {
-							((Comment) childPost).setOrginalPostId(-1);
-						}
+		if (post.getId() == id) {
+			postExists = true;
+			for (Post childPost : posts) {
+				if (childPost instanceof Endorsement) {
+					if (((Endorsement) childPost).getEndorsedHandle() == post.getHandle()) {
+						deletePost(childPost.getId());
+					}
+				} else if (childPost instanceof Comment) {
+					if (((Comment) childPost).getOrginalPostId() == post.getId()) {
+						((Comment) childPost).setOrginalPostId(-1);
 					}
 				}
-				posts.remove(post);
 			}
+			posts.remove(post);
 		}
+	}
         if (!postExists) {
         	throw new PostIDNotRecognisedException();
         }
