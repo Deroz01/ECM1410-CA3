@@ -23,9 +23,15 @@ public class Account implements Serializable{
     public int getPostCount() {
 		return postCount;
 	}
+    public void increasePostCount() {
+    	postCount++;
+    }
     public int getEndorseCount() {
 		return endorseCount;
 	}
+    public void increaseEndorseCount() {
+    	endorseCount++;
+    }
     public void setHandle(String handle) {
         this.handle = handle;
     }
