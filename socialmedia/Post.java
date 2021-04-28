@@ -8,12 +8,25 @@ public class Post implements Serializable{
     private int id;
     private int commentNumber;
     private int endorseNumber;
+    private int indent;
+    public int getIndent() {
+		return indent;
+	}
+    public void setIndent(int indent) {
+		this.indent = indent;
+	}
+	public int indent(int level) {
+		return level++;
+	}
     public String getHandle() {
         return handle;
     }
     public String getMessage() {
         return message;
     }
+    public void setMessage(String message) {
+		this.message = message;
+	}
     public int getId() {
         return id;
     }
@@ -33,7 +46,9 @@ public class Post implements Serializable{
     	commentNumber++;
     }
     public void decreaseCommentNumber (){
-    	commentNumber--;
+    	if (commentNumber>0) {
+    		commentNumber--;
+    	}
     }
     public static void resetIdCounter() {
     	idCount = 0;
@@ -47,10 +62,12 @@ public class Post implements Serializable{
         this.id = idCount;
         idCount++;
     }
-    
+    public static int getIdCount() {
+		return idCount;
+	}
     @Override
 	public String toString() {
-		return "ID: " + id + "\nAccount: " + handle + "\nNo. endorsements: " + endorseNumber + " | No. comments: "+ getCommentNumber() + "\n" + message;
+		return "ID: " + id + "\nAccount: " + handle + "\nNo. endorsements: " + endorseNumber + " | No. comments: "+ commentNumber + "\n" + message;
 	}
     public String commentString(int a) {
     	String firstLine = "";
@@ -64,11 +81,6 @@ public class Post implements Serializable{
 		return firstLine+"| > ID: " + getId() + "\n"+ indent+ "Account: " + getHandle() + "\n"+ indent +"No. endorsements: " + getEndorseNumber() + " | No. comments: "+ getCommentNumber() + "\n" + indent + getMessage();
 	}
     
-    public Post() {
-    	this.message = "The original content was removed from the system and is no longer available.";
-    	this.id = -1;
-    }
-    
 	public static void main(String[] args) {
         Post a = new Post("a", "welcome");
         //System.out.println(a);
@@ -78,7 +90,5 @@ public class Post implements Serializable{
         System.out.println(c.commentString(1));
         System.out.println(c.commentString(2));
         //System.out.println(c);
-        Post genericPost = new Post();
-        //System.out.println(genericPost);
     }
 }
