@@ -8,6 +8,10 @@ public class Comment extends Post {
 		// TODO Auto-generated constructor stub
 		this.orginalPostId = id;
 	}
+	public Comment(int id, String handle, String message, int indent) {
+		this(id, handle, message);
+		this.setIndent(indent+1);
+	}
 
 	public int getOrginalPostId() {
 		return orginalPostId;
@@ -15,4 +19,5 @@ public class Comment extends Post {
 	public void setOrginalPostId(int orginalPostId) {
 		this.orginalPostId = orginalPostId;
 	}
+	
 }
