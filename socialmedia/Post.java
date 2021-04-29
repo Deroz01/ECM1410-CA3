@@ -2,6 +2,11 @@ package socialmedia;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+/**
+ * This class contains a handle, message, id, number of comments, number of endorsements and level of indent
+ * @author Luca de Rozairo and Tommy Mack
+ *
+ */
 public class Post implements Serializable{
     private String handle;
     private String message;
