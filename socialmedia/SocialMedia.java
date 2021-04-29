@@ -7,7 +7,13 @@ import java.util.ArrayList;
  *
  */
 public class SocialMedia implements SocialMediaPlatform {
+	/**
+	 * Accounts
+	 */
     private ArrayList<Account> accounts = new ArrayList<>();
+    /**
+     * Posts
+     */
     private ArrayList<Post> posts = new ArrayList<>();
     /**
      * All accounts in the social media platform
