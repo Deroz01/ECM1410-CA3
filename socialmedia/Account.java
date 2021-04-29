@@ -1,7 +1,11 @@
 package socialmedia;
 
 import java.io.Serializable;
-
+/**
+ * This class contains a post id, handle, description, number of posts and number of endorsements
+ * @author Luca de Rozairo and Tommy Mack
+ *
+ */
 public class Account implements Serializable{
     private int id;
     private String handle;
