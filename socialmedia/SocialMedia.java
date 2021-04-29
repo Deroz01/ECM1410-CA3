@@ -1,18 +1,28 @@
 package socialmedia;
 import java.io.*;
 import java.util.ArrayList;
-
+/**
+ * This class defines a new Social Media platform with list of accounts and posts
+ * @author Luca de Rozairo and Tommy Mack
+ *
+ */
 public class SocialMedia implements SocialMediaPlatform {
-    ArrayList<Account> accounts = new ArrayList<>();
-    ArrayList<Post> posts = new ArrayList<>();
-    
+    private ArrayList<Account> accounts = new ArrayList<>();
+    private ArrayList<Post> posts = new ArrayList<>();
+    /**
+     * All accounts in the social media platform
+     * @return Array list of Account objects
+     */
     public ArrayList<Post> getPosts() {
 		return posts;
 	}
+    /**
+     * All posts in the social media platform
+     * @return Array list of Post objects
+     */
     public ArrayList<Account> getAccounts() {
 		return accounts;
 	}
-
 	@Override
     public int createAccount(String handle) throws IllegalHandleException, InvalidHandleException {
     	boolean accountExists = false;
@@ -53,13 +63,16 @@ public class SocialMedia implements SocialMediaPlatform {
 				try {
 					deletePost(post.getId());
 				} catch (PostIDNotRecognisedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
 			}
-		}
+			if (post instanceof Comment && ((Comment)post).getOrginalPostId() == id) {
+				try {
+					deletePost(post.getId());
+				} catch (PostIDNotRecognisedException e) {
+				}
+			}
+        }
     }
-
     @Override
     public void changeAccountHandle(String oldHandle, String newHandle) throws HandleNotRecognisedException, IllegalHandleException, InvalidHandleException {
     	boolean oldHandleExists = false;
@@ -250,9 +263,10 @@ public class SocialMedia implements SocialMediaPlatform {
         boolean actionablePost = false;
         Post parentPost = null;
         for (Post post : posts) {
-            if (post.getId() == id && post instanceof Post) {
+            if (post.getId() == id) {
                 postExists = true;
-                actionablePost = true;
+            	actionablePost = true;
+                
                 parentPost = post;
             }
         }
@@ -272,34 +286,31 @@ public class SocialMedia implements SocialMediaPlatform {
         }
         else{
             for (Post post : posts) {
+            	int indent = 1;
                 if (post instanceof Comment && ((Comment) post).getOrginalPostId() == parentPost.getId()) {
                     if (post.getCommentNumber() > 0){
-                        str.append(post.commentString(post.getIndent()));
+                        str.append(post.commentString(indent));
                         int additionalComments = post.getCommentNumber();
                         Post tempParentPost = post;
                         while (additionalComments > 0){
                             for (Post post1 : posts){
                                 if (post1 instanceof Comment && ((Comment) post1).getOrginalPostId() == tempParentPost.getId()) {
-                                    str.append(post1.commentString(post1.getIndent()));
+                                    str.append(post1.commentString(indent+1));
                                     additionalComments -= 1;
                                     if (post1.getCommentNumber() > 0) {
                                         tempParentPost = post1;
-                                    }
-                                    else{
-                                        tempParentPost = post;
+                                        indent++;
                                     }
                                 }
                             }
                         }
                     }
                     else {
-                        str.append(post.commentString(post.getIndent()));
+                        str.append(post.commentString(indent));
                     }
                 }
             }
         }
-
-        System.out.println(str);
         return str;
     }
 
@@ -341,7 +352,6 @@ public class SocialMedia implements SocialMediaPlatform {
         this.posts.clear();
         Post.resetIdCounter();
         Account.resetIdCounter();
-        System.out.println("\nPlatform erased...");
     }
 
     @Override
@@ -350,7 +360,6 @@ public class SocialMedia implements SocialMediaPlatform {
 		outputStream.writeObject(this);
 		outputStream.flush();
 		outputStream.close();
-		System.out.printf("\nPlatform saved in %s%n", filename);
     }
 
     @Override
@@ -360,7 +369,6 @@ public class SocialMedia implements SocialMediaPlatform {
         if (obj instanceof SocialMedia) {
         	this.accounts = ((SocialMedia) obj).accounts;
         	this.posts = ((SocialMedia) obj).posts;
-        	System.out.printf("\nPlatform loaded from %s%n", filename);
         }
         in.close();
         
@@ -452,6 +460,10 @@ public class SocialMedia implements SocialMediaPlatform {
 		}
         return totalComments;
     }
+    /**
+     * Increase the number of comments on all parent posts
+     * @param comment Comment object that is created	
+     */
     public void increaseCommentsAllParentPosts (Post comment) {
     	for (Post post : posts) {
     		if (comment instanceof Comment && ((Comment)comment).getOrginalPostId() == post.getId()) {
@@ -460,40 +472,5 @@ public class SocialMedia implements SocialMediaPlatform {
 			}
     		
     	}
-    }
-    public static void main(String[] args) {
-    	//new SocialMedia
-        SocialMedia a = new SocialMedia();
-        try {
-			a.createAccount("user1");
-			a.createAccount("user2");
-			a.createAccount("user3");
-			a.createAccount("user4");
-			a.createAccount("user5");
-		} catch (IllegalHandleException | InvalidHandleException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        try {
-			int firstPost = a.createPost("user1", "I like examples...");
-			int secondPost = a.commentPost("user2", firstPost, "comment");
-			int thirdPost = a.commentPost("user2", secondPost, "No more than me...");
-			a.commentPost("user2", secondPost, "No more than me...");
-			
-		} catch (HandleNotRecognisedException | InvalidPostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (PostIDNotRecognisedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NotActionablePostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        
-        for (Post post: a.getPosts()) {
-        	System.out.println(post);
-        }
-        
     }
 }
